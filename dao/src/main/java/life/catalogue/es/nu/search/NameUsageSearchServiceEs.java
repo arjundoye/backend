@@ -5,7 +5,7 @@ import life.catalogue.api.search.NameUsageSearchRequest;
 import life.catalogue.api.search.NameUsageSearchResponse;
 import life.catalogue.es.EsException;
 import life.catalogue.es.EsNameUsage;
-import life.catalogue.es.NameUsageSearchService;
+import life.catalogue.search.NameUsageSearchService;
 import life.catalogue.es.nu.NameUsageQueryService;
 import life.catalogue.es.query.EsSearchRequest;
 import life.catalogue.es.response.EsResponse;

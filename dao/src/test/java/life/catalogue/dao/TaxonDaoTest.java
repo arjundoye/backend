@@ -13,7 +13,7 @@ import life.catalogue.db.TestDataRule;
 import life.catalogue.db.mapper.SectorMapper;
 import life.catalogue.db.mapper.SectorMapperTest;
 import life.catalogue.db.mapper.SynonymMapper;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 
 import org.gbif.nameparser.api.Authorship;

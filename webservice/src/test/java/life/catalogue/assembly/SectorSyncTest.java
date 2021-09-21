@@ -8,7 +8,7 @@ import life.catalogue.db.MybatisTestUtils;
 import life.catalogue.db.PgSetupRule;
 import life.catalogue.db.TestDataRule;
 import life.catalogue.db.mapper.*;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 import org.apache.ibatis.session.SqlSession;
 import org.gbif.nameparser.api.NameType;

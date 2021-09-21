@@ -1,4 +1,4 @@
-package life.catalogue.es;
+package life.catalogue.search;
 
 import life.catalogue.api.model.DSID;
 import life.catalogue.api.search.NameUsageWrapper;
@@ -34,7 +34,7 @@ public interface NameUsageIndexService {
   /**
    * Creates an empty name usage index, dropping any potentially existing index under the same name.
    */
-  int createEmptyIndex();
+  void createEmptyIndex();
 
   /**
    * Indexes all CoL usages from an entire sector from postgres into ElasticSearch using the bulk API.
@@ -61,8 +61,6 @@ public interface NameUsageIndexService {
    * Indexes an entire dataset from postgres into ElasticSearch using the bulk API.
    */
   Stats indexDataset(int datasetKey);
-
-  BatchConsumer<NameUsageWrapper> buildDatasetIndexingHandler(int datasetKey);
 
   /**
    * Removes an entire dataset from ElasticSearch.
@@ -95,7 +93,7 @@ public interface NameUsageIndexService {
    * Adds given usages incl bare names to the index without deleting them beforehand.
    * @return number of successfully added documents
    */
-  int add(List<NameUsageWrapper> usages);
+  void add(NameUsageWrapper usage);
 
   /**
    * Updates the classification for all descendants in the subtree identified by the rootTaxonId. All other information is left as is and no
@@ -110,9 +108,8 @@ public interface NameUsageIndexService {
     return new NameUsageIndexService() {
 
       @Override
-      public int createEmptyIndex() {
+      public void createEmptyIndex() {
         LOG.info("No Elastic Search configured, pass through index deletion");
-        return 204;
       }
 
       @Override
@@ -144,26 +141,6 @@ public interface NameUsageIndexService {
       }
 
       @Override
-      public BatchConsumer<NameUsageWrapper> buildDatasetIndexingHandler(int datasetKey) {
-        LOG.info("No Elastic Search configured, pass through dataset {}", datasetKey);
-        return new BatchConsumer<>(new Consumer<List<NameUsageWrapper>>() {
-          final NameUsageWrapperConverter converter = new NameUsageWrapperConverter();
-
-          @Override
-          public void accept(List<NameUsageWrapper> nameUsageWrappers) {
-            // convert nu wrappers to make sure
-            try {
-              for (NameUsageWrapper nuw : nameUsageWrappers) {
-                converter.toDocument(nuw);
-              }
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          }
-        }, 100);
-      }
-
-      @Override
       public int deleteDataset(int datasetKey) {
         LOG.info("No Elastic Search configured, pass through deletion of dataset {}", datasetKey);
         return 0;
@@ -175,9 +152,8 @@ public interface NameUsageIndexService {
       }
 
       @Override
-      public int add(List<NameUsageWrapper> usages) {
-        LOG.info("No Elastic Search configured, pass through adding of {} usages", usages.size());
-        return 0;
+      public void add(NameUsageWrapper usage) {
+        LOG.info("No Elastic Search configured, pass through adding usage {}", usage);
       }
 
       @Override

@@ -2,13 +2,12 @@ package life.catalogue.dao;
 
 import life.catalogue.api.model.CitationTest;
 import life.catalogue.api.model.Dataset;
-import life.catalogue.api.model.DatasetTest;
 import life.catalogue.api.vocab.DatasetOrigin;
 import life.catalogue.api.vocab.Datasets;
 import life.catalogue.api.vocab.Users;
 import life.catalogue.db.PgSetupRule;
 import life.catalogue.db.mapper.DatasetMapperTest;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.img.ImageService;
 
 import java.io.File;
@@ -22,9 +21,6 @@ import org.junit.Test;
 import com.google.common.eventbus.EventBus;
 
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

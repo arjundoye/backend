@@ -7,7 +7,7 @@ import life.catalogue.api.vocab.Users;
 import life.catalogue.dao.NameDao;
 import life.catalogue.db.PgSetupRule;
 import life.catalogue.db.TestDataRule;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 
 import org.apache.ibatis.cursor.Cursor;

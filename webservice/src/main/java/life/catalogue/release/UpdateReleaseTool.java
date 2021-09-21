@@ -19,7 +19,7 @@ import life.catalogue.db.mapper.DatasetSourceMapper;
 import life.catalogue.doi.DoiUpdater;
 import life.catalogue.doi.datacite.model.DoiState;
 import life.catalogue.doi.service.*;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 import life.catalogue.matching.decision.EstimateRematcher;
 import life.catalogue.matching.decision.RematcherBase;

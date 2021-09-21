@@ -10,7 +10,7 @@ import life.catalogue.api.search.NameUsageWrapper;
 import life.catalogue.db.mapper.NameMatchMapper;
 import life.catalogue.db.mapper.NameUsageMapper;
 import life.catalogue.es.InvalidQueryException;
-import life.catalogue.es.NameUsageSearchService;
+import life.catalogue.search.NameUsageSearchService;
 
 import org.gbif.nameparser.api.Rank;
 
@@ -29,7 +29,6 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

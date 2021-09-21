@@ -3,7 +3,6 @@ package life.catalogue.release;
 import life.catalogue.WsServerConfig;
 import life.catalogue.api.model.*;
 import life.catalogue.api.search.DatasetSearchRequest;
-import life.catalogue.api.util.ObjectUtils;
 import life.catalogue.api.vocab.*;
 import life.catalogue.cache.VarnishUtils;
 import life.catalogue.common.date.FuzzyDate;
@@ -16,7 +15,7 @@ import life.catalogue.db.mapper.DatasetMapper;
 import life.catalogue.db.mapper.DatasetSourceMapper;
 import life.catalogue.doi.DoiUpdater;
 import life.catalogue.doi.service.DoiService;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.exporter.ExportManager;
 import life.catalogue.img.ImageService;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 public class ProjectRelease extends AbstractProjectCopy {
   private static final String DEFAULT_ALIAS_TEMPLATE = "{aliasOrTitle}-{date}";

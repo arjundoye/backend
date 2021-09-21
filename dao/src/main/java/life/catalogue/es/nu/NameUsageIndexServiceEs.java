@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import life.catalogue.search.NameUsageIndexService;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -63,7 +64,6 @@ public class NameUsageIndexServiceEs implements NameUsageIndexService {
     return indexDatasetInternal(datasetKey, true);
   }
 
-  @Override
   public BatchConsumer<NameUsageWrapper> buildDatasetIndexingHandler(int datasetKey) {
     LOG.info("Start indexing dataset {}", datasetKey);
     try {
@@ -212,15 +212,7 @@ public class NameUsageIndexServiceEs implements NameUsageIndexService {
   }
 
   @Override
-  public int add(List<NameUsageWrapper> usages) {
-    if (!usages.isEmpty()) {
-      NameUsageWrapper first = usages.iterator().next();
-      LOG.info("Adding {} usages. First: {}", usages.size(), first.getUsage());
-      NameUsageIndexer indexer = new NameUsageIndexer(client, esConfig.nameUsage.name);
-      indexer.accept(usages);
-      return indexer.documentsIndexed();
-    }
-    return 0;
+  public void add(NameUsageWrapper usage) {
   }
 
   @Override
@@ -237,10 +229,10 @@ public class NameUsageIndexServiceEs implements NameUsageIndexService {
   }
 
   @Override
-  public int createEmptyIndex() {
+  public void createEmptyIndex() {
     try {
       EsUtil.deleteIndex(client, esConfig.nameUsage);
-      return EsUtil.createIndex(client, EsNameUsage.class, esConfig.nameUsage);
+      EsUtil.createIndex(client, EsNameUsage.class, esConfig.nameUsage);
     } catch (IOException e) {
       throw new EsException(e);
     }

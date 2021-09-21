@@ -8,7 +8,7 @@ import life.catalogue.common.date.FuzzyDate;
 import life.catalogue.dao.NameDao;
 import life.catalogue.db.MybatisTestUtils;
 import life.catalogue.db.PgSetupRule;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 
 import org.gbif.nameparser.api.Rank;

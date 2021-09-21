@@ -15,7 +15,7 @@ import life.catalogue.config.ImporterConfig;
 import life.catalogue.dao.Partitioner;
 import life.catalogue.db.Create;
 import life.catalogue.db.mapper.*;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.importer.neo.NeoDb;
 import life.catalogue.importer.neo.NeoDbUtils;
 import life.catalogue.importer.neo.model.Labels;
@@ -369,159 +369,160 @@ public class PgImport implements Callable<Boolean> {
    * This also indexes usages into the ES search index!
    */
   private void insertUsages() throws InterruptedException {
-    try (var indexer = indexService.buildDatasetIndexingHandler(dataset.getKey())) {
-      final Map<String, List<SimpleDecision>> decisions = new HashMap<>();
-      try (SqlSession session = sessionFactory.openSession(true)) {
-        AtomicInteger cnt = new AtomicInteger(0);
-        session.getMapper(DecisionMapper.class).processDecisions(null, dataset.getKey()).forEach(d -> {
-          if (d.getSubject().getId() != null) {
-            if (!decisions.containsKey(d.getSubject().getId())) {
-              decisions.put(d.getSubject().getId(), new ArrayList<>());
-            }
-            decisions.get(d.getSubject().getId()).add(new SimpleDecision(d.getId(), d.getDatasetKey(), d.getMode()));
-            cnt.incrementAndGet();
+    LOG.info("Remove dataset {} from search index", dataset.getKey());
+    indexService.deleteDataset(dataset.getKey());
+
+    final Map<String, List<SimpleDecision>> decisions = new HashMap<>();
+    try (SqlSession session = sessionFactory.openSession(true)) {
+      AtomicInteger cnt = new AtomicInteger(0);
+      session.getMapper(DecisionMapper.class).processDecisions(null, dataset.getKey()).forEach(d -> {
+        if (d.getSubject().getId() != null) {
+          if (!decisions.containsKey(d.getSubject().getId())) {
+            decisions.put(d.getSubject().getId(), new ArrayList<>());
           }
-        });
-        LOG.info("Loaded {} decisions for indexing", cnt);
-      }
-
-      try (SqlSession session = sessionFactory.openSession(ExecutorType.BATCH, false)) {
-        LOG.info("Inserting remaining names and all taxa");
-        TreatmentMapper treatmentMapper = session.getMapper(TreatmentMapper.class);
-        DistributionMapper distributionMapper = session.getMapper(DistributionMapper.class);
-        EstimateMapper estimateMapper = session.getMapper(EstimateMapper.class);
-        MediaMapper mediaMapper = session.getMapper(MediaMapper.class);
-        TaxonMapper taxonMapper = session.getMapper(TaxonMapper.class);
-        SynonymMapper synMapper = session.getMapper(SynonymMapper.class);
-        VernacularNameMapper vernacularMapper = session.getMapper(VernacularNameMapper.class);
-
-        // iterate over taxonomic tree in depth first order, keeping postgres parent keys
-        // pro parte synonyms will be visited multiple times, remember their name ids!
-        TreeWalker.walkTree(store.getNeo(), new StartEndHandler() {
-          int counter = 0;
-          Stack<SimpleName> parents = new Stack<>();
-          Stack<Node> parentsN = new Stack<>();
-
-          @Override
-          public void start(Node n) {
-            Set<Integer> vKeys = new HashSet<>();
-
-            NeoUsage u = fillNeoUsage(n, parents.isEmpty() ? null : parents.peek(), vKeys);
-
-            // insert taxon or synonym
-            if (u.isSynonym()) {
-              if (NeoDbUtils.isProParteSynonym(n)) {
-                if (proParteIds.contains(u.getId())) {
-                  // we had that id before, append a random suffix for further pro parte usage
-                  UUID ppID = UUID.randomUUID();
-                  u.setId(u.getId() + "-" + ppID);
-                } else {
-                  proParteIds.add(u.getId());
-                }
-              }
-              synMapper.create(u.getSynonym());
-              sCounter.incrementAndGet();
-
-            } else {
-              taxonMapper.create(updateUser(u.getTaxon()));
-              tCounter.incrementAndGet();
-              Taxon acc = u.getTaxon();
-
-              // push new postgres key onto stack for this taxon as we traverse in depth first
-              // ES indexes only id,rank & name
-              parents.push(new SimpleName(acc.getId(), acc.getName().getScientificName(), acc.getName().getRank()));
-              parentsN.push(u.node);
-
-              // insert vernacular
-              for (VernacularName vn : u.vernacularNames) {
-                updateVerbatimUserEntity(vn, vKeys);
-                updateReferenceKey(vn);
-                vernacularMapper.create(vn, acc.getId());
-                vCounter.incrementAndGet();
-              }
-
-              // insert distributions
-              for (Distribution d : u.distributions) {
-                updateVerbatimUserEntity(d, vKeys);
-                updateReferenceKey(d);
-                distributionMapper.create(d, acc.getId());
-                diCounter.incrementAndGet();
-              }
-
-              // insert treatments
-              if (u.treatment != null) {
-                u.treatment.setId(acc.getId());
-                updateVerbatimUserEntity(u.treatment, vKeys);
-                treatmentMapper.create(u.treatment);
-                trCounter.incrementAndGet();
-              }
-
-              // insert media
-              for (Media m : u.media) {
-                updateVerbatimUserEntity(m, vKeys);
-                updateReferenceKey(m);
-                mediaMapper.create(m, acc.getId());
-                mCounter.incrementAndGet();
-              }
-
-              // insert estimates
-              for (SpeciesEstimate e : u.estimates) {
-                updateVerbatimUserEntity(e, vKeys);
-                updateReferenceKey(e);
-                e.setTarget(SimpleNameLink.of(acc.getId()));
-                estimateMapper.create(e);
-                eCounter.incrementAndGet();
-              }
-
-            }
-
-            // commit in batches
-            if (counter++ % batchSize == 0) {
-              interruptIfCancelled();
-              session.commit();
-              LOG.info("Inserted {} names and taxa", counter);
-            }
-
-            // index into ES
-            NameUsageWrapper nuw = new NameUsageWrapper(u.usage);
-            nuw.setPublisherKey(dataset.getGbifPublisherKey());
-            nuw.setClassification(new ArrayList<>(parents));
-            nuw.setIssues(mergeIssues(vKeys));
-            if (u.usage.isSynonym()) {
-              NeoUsage acc = fillNeoUsage(parentsN.peek(), parents.peek(), null);
-              ((Synonym)u.usage).setAccepted(acc.getTaxon());
-              nuw.getClassification().add(new SimpleName(u.usage.getId(), u.usage.getName().getScientificName(), u.usage.getName().getRank()));
-            }
-            nuw.setDecisions(decisions.get(u.getId()));
-            indexer.accept(nuw);
-          }
-
-          @Override
-          public void end(Node n) {
-            interruptIfCancelled();
-            // remove this key from parent queue if its an accepted taxon
-            if (n.hasLabel(Labels.TAXON)) {
-              parents.pop();
-              parentsN.pop();
-            }
-          }
-        });
-        session.commit();
-        LOG.debug("Inserted {} names and {} taxa", nCounter, tCounter);
-      }
-
-      // index bare names
-      try (Transaction tx = store.getNeo().beginTx()) {
-        ResourceIterator<Node> iter = store.bareNames();
-        while (iter.hasNext()) {
-          Set<Integer> vKeys = new HashSet<>();
-          NeoName nn = updateNeoName(iter.next(), vKeys);
-          BareName bn = new BareName(nn.getName());
-          NameUsageWrapper nuw = new NameUsageWrapper(bn);
-          nuw.setPublisherKey(dataset.getGbifPublisherKey());
-          nuw.setIssues(mergeIssues(vKeys));
-          indexer.accept(nuw);
+          decisions.get(d.getSubject().getId()).add(new SimpleDecision(d.getId(), d.getDatasetKey(), d.getMode()));
+          cnt.incrementAndGet();
         }
+      });
+      LOG.info("Loaded {} decisions for indexing", cnt);
+    }
+
+    try (SqlSession session = sessionFactory.openSession(ExecutorType.BATCH, false)) {
+      LOG.info("Inserting remaining names and all taxa");
+      TreatmentMapper treatmentMapper = session.getMapper(TreatmentMapper.class);
+      DistributionMapper distributionMapper = session.getMapper(DistributionMapper.class);
+      EstimateMapper estimateMapper = session.getMapper(EstimateMapper.class);
+      MediaMapper mediaMapper = session.getMapper(MediaMapper.class);
+      TaxonMapper taxonMapper = session.getMapper(TaxonMapper.class);
+      SynonymMapper synMapper = session.getMapper(SynonymMapper.class);
+      VernacularNameMapper vernacularMapper = session.getMapper(VernacularNameMapper.class);
+
+      // iterate over taxonomic tree in depth first order, keeping postgres parent keys
+      // pro parte synonyms will be visited multiple times, remember their name ids!
+      TreeWalker.walkTree(store.getNeo(), new StartEndHandler() {
+        int counter = 0;
+        Stack<SimpleName> parents = new Stack<>();
+        Stack<Node> parentsN = new Stack<>();
+
+        @Override
+        public void start(Node n) {
+          Set<Integer> vKeys = new HashSet<>();
+
+          NeoUsage u = fillNeoUsage(n, parents.isEmpty() ? null : parents.peek(), vKeys);
+
+          // insert taxon or synonym
+          if (u.isSynonym()) {
+            if (NeoDbUtils.isProParteSynonym(n)) {
+              if (proParteIds.contains(u.getId())) {
+                // we had that id before, append a random suffix for further pro parte usage
+                UUID ppID = UUID.randomUUID();
+                u.setId(u.getId() + "-" + ppID);
+              } else {
+                proParteIds.add(u.getId());
+              }
+            }
+            synMapper.create(u.getSynonym());
+            sCounter.incrementAndGet();
+
+          } else {
+            taxonMapper.create(updateUser(u.getTaxon()));
+            tCounter.incrementAndGet();
+            Taxon acc = u.getTaxon();
+
+            // push new postgres key onto stack for this taxon as we traverse in depth first
+            // ES indexes only id,rank & name
+            parents.push(new SimpleName(acc.getId(), acc.getName().getScientificName(), acc.getName().getRank()));
+            parentsN.push(u.node);
+
+            // insert vernacular
+            for (VernacularName vn : u.vernacularNames) {
+              updateVerbatimUserEntity(vn, vKeys);
+              updateReferenceKey(vn);
+              vernacularMapper.create(vn, acc.getId());
+              vCounter.incrementAndGet();
+            }
+
+            // insert distributions
+            for (Distribution d : u.distributions) {
+              updateVerbatimUserEntity(d, vKeys);
+              updateReferenceKey(d);
+              distributionMapper.create(d, acc.getId());
+              diCounter.incrementAndGet();
+            }
+
+            // insert treatments
+            if (u.treatment != null) {
+              u.treatment.setId(acc.getId());
+              updateVerbatimUserEntity(u.treatment, vKeys);
+              treatmentMapper.create(u.treatment);
+              trCounter.incrementAndGet();
+            }
+
+            // insert media
+            for (Media m : u.media) {
+              updateVerbatimUserEntity(m, vKeys);
+              updateReferenceKey(m);
+              mediaMapper.create(m, acc.getId());
+              mCounter.incrementAndGet();
+            }
+
+            // insert estimates
+            for (SpeciesEstimate e : u.estimates) {
+              updateVerbatimUserEntity(e, vKeys);
+              updateReferenceKey(e);
+              e.setTarget(SimpleNameLink.of(acc.getId()));
+              estimateMapper.create(e);
+              eCounter.incrementAndGet();
+            }
+
+          }
+
+          // commit in batches
+          if (counter++ % batchSize == 0) {
+            interruptIfCancelled();
+            session.commit();
+            LOG.info("Inserted {} names and taxa", counter);
+          }
+
+          // index into ES
+          NameUsageWrapper nuw = new NameUsageWrapper(u.usage);
+          nuw.setPublisherKey(dataset.getGbifPublisherKey());
+          nuw.setClassification(new ArrayList<>(parents));
+          nuw.setIssues(mergeIssues(vKeys));
+          if (u.usage.isSynonym()) {
+            NeoUsage acc = fillNeoUsage(parentsN.peek(), parents.peek(), null);
+            ((Synonym)u.usage).setAccepted(acc.getTaxon());
+            nuw.getClassification().add(new SimpleName(u.usage.getId(), u.usage.getName().getScientificName(), u.usage.getName().getRank()));
+          }
+          nuw.setDecisions(decisions.get(u.getId()));
+          indexService.add(nuw);
+        }
+
+        @Override
+        public void end(Node n) {
+          interruptIfCancelled();
+          // remove this key from parent queue if its an accepted taxon
+          if (n.hasLabel(Labels.TAXON)) {
+            parents.pop();
+            parentsN.pop();
+          }
+        }
+      });
+      session.commit();
+      LOG.debug("Inserted {} names and {} taxa", nCounter, tCounter);
+    }
+
+    // index bare names
+    try (Transaction tx = store.getNeo().beginTx()) {
+      ResourceIterator<Node> iter = store.bareNames();
+      while (iter.hasNext()) {
+        Set<Integer> vKeys = new HashSet<>();
+        NeoName nn = updateNeoName(iter.next(), vKeys);
+        BareName bn = new BareName(nn.getName());
+        NameUsageWrapper nuw = new NameUsageWrapper(bn);
+        nuw.setPublisherKey(dataset.getGbifPublisherKey());
+        nuw.setIssues(mergeIssues(vKeys));
+        indexService.add(nuw);
       }
     }
   }

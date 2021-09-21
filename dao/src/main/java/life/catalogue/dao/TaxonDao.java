@@ -6,7 +6,7 @@ import life.catalogue.api.vocab.EntityType;
 import life.catalogue.api.vocab.Origin;
 import life.catalogue.api.vocab.TaxonomicStatus;
 import life.catalogue.db.mapper.*;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.parser.NameParser;
 
 import org.gbif.nameparser.api.NameType;
@@ -467,7 +467,7 @@ public class TaxonDao extends DatasetEntityDao<String, Taxon, TaxonMapper> {
     // update ES. there is probably a bare name now to be indexed!
     indexService.delete(did);
     if (bare != null) {
-      indexService.add(List.of(bare));
+      indexService.add(bare);
     }
     return false;
   }

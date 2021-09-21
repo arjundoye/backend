@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import life.catalogue.search.NameUsageSuggestionService;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;

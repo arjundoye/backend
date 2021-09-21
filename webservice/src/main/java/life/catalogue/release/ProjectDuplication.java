@@ -4,7 +4,7 @@ import life.catalogue.api.model.Dataset;
 import life.catalogue.api.model.DatasetSettings;
 import life.catalogue.dao.DatasetDao;
 import life.catalogue.dao.DatasetImportDao;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.validation.Validator;

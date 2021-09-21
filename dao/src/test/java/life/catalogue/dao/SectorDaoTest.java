@@ -12,7 +12,7 @@ import life.catalogue.db.mapper.DatasetMapper;
 import life.catalogue.db.mapper.SectorMapperTest;
 import life.catalogue.db.mapper.TaxonMapper;
 import life.catalogue.db.mapper.TreeMapper;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 
 import org.apache.ibatis.session.SqlSession;

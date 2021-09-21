@@ -33,9 +33,9 @@ import life.catalogue.dw.jersey.ColJerseyBundle;
 import life.catalogue.dw.mail.MailBundle;
 import life.catalogue.dw.metrics.GangliaBundle;
 import life.catalogue.es.EsClientFactory;
-import life.catalogue.es.NameUsageIndexService;
-import life.catalogue.es.NameUsageSearchService;
-import life.catalogue.es.NameUsageSuggestionService;
+import life.catalogue.search.NameUsageIndexService;
+import life.catalogue.search.NameUsageSearchService;
+import life.catalogue.search.NameUsageSuggestionService;
 import life.catalogue.es.nu.NameUsageIndexServiceEs;
 import life.catalogue.es.nu.search.NameUsageSearchServiceEs;
 import life.catalogue.es.nu.suggest.NameUsageSuggestionServiceEs;
@@ -62,7 +62,6 @@ import org.gbif.dwc.terms.TermFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.concurrent.Executors;
 
 import javax.validation.Validator;
 import javax.ws.rs.client.Client;

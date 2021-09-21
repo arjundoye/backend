@@ -19,6 +19,7 @@ import life.catalogue.es.query.TermQuery;
 import life.catalogue.es.query.TermsQuery;
 import life.catalogue.matching.NameIndexFactory;
 
+import life.catalogue.search.NameUsageIndexService;
 import org.gbif.nameparser.api.Rank;
 
 import java.io.IOException;

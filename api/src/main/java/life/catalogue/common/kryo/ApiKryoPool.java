@@ -51,23 +51,24 @@ public class ApiKryoPool extends Pool<Kryo> {
     kryo.register(BareName.class);
     kryo.register(Citation.class);
     kryo.register(Classification.class);
+    kryo.register(DOI.class);
     kryo.register(Dataset.class);
     kryo.register(DatasetImport.class);
-    kryo.register(DOI.class);
     kryo.register(Distribution.class);
-    kryo.register(EditorialDecision.class);
     kryo.register(EditorialDecision.Mode.class);
+    kryo.register(EditorialDecision.class);
     kryo.register(IndexName.class);
     kryo.register(Media.class);
     kryo.register(Name.class);
-    kryo.register(ParsedNameUsage.class);
     kryo.register(NameRelation.class);
+    kryo.register(NameUsageWrapper.class);
     kryo.register(Page.class);
-    kryo.register(ParsedName.class);
     kryo.register(ParsedName.State.class);
+    kryo.register(ParsedName.class);
+    kryo.register(ParsedNameUsage.class);
     kryo.register(Reference.class);
-    kryo.register(Sector.class);
     kryo.register(Sector.Mode.class);
+    kryo.register(Sector.class);
     kryo.register(SimpleDecision.class);
     kryo.register(SimpleName.class);
     kryo.register(SpeciesEstimate.class);
@@ -79,10 +80,6 @@ public class ApiKryoPool extends Pool<Kryo> {
     kryo.register(TypeMaterial.class);
     kryo.register(VerbatimRecord.class);
     kryo.register(VernacularName.class);
-
-    // search
-    kryo.register(NameUsageWrapper.class);
-    kryo.register(SimpleDecision.class);
 
     // CSL classes & enums
     kryo.register(CslData.class);

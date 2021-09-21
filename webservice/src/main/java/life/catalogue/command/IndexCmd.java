@@ -6,7 +6,7 @@ import io.dropwizard.setup.Bootstrap;
 import life.catalogue.WsServerConfig;
 import life.catalogue.db.MybatisFactory;
 import life.catalogue.es.EsClientFactory;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.es.nu.NameUsageIndexServiceEs;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;

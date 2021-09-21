@@ -5,7 +5,7 @@ import life.catalogue.api.vocab.NomRelType;
 import life.catalogue.db.mapper.NameMapper;
 import life.catalogue.db.mapper.NameMatchMapper;
 import life.catalogue.db.mapper.NameRelationMapper;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndex;
 
 import java.time.LocalDateTime;

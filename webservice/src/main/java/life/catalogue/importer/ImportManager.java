@@ -28,7 +28,7 @@ import life.catalogue.dao.DatasetImportDao;
 import life.catalogue.dao.DecisionDao;
 import life.catalogue.dao.SectorDao;
 import life.catalogue.db.mapper.DatasetMapper;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.img.ImageService;
 import life.catalogue.matching.NameIndex;
 import life.catalogue.release.ReleaseManager;

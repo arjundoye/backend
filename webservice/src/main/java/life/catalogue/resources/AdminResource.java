@@ -11,7 +11,7 @@ import life.catalogue.concurrent.BackgroundJob;
 import life.catalogue.concurrent.JobExecutor;
 import life.catalogue.concurrent.JobPriority;
 import life.catalogue.dw.auth.Roles;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.gbifsync.GbifSync;
 import life.catalogue.img.ImageService;
 import life.catalogue.img.LogoUpdateJob;
@@ -230,13 +230,6 @@ public class AdminResource {
     } else {
       return runJob(RematchJob.some(user.getKey(),factory,ni, datasetKeys.stream().mapToInt(i->i).toArray()));
     }
-  }
-
-  @DELETE
-  @Path("/reindex")
-  public int createEmptyIndex(@Auth User user) {
-    LOG.warn("Drop and recreate empty search index by {}", user);
-    return indexService.createEmptyIndex();
   }
 
   @POST

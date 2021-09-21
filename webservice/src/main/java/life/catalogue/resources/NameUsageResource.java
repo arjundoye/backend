@@ -6,8 +6,8 @@ import life.catalogue.db.mapper.NameMatchMapper;
 import life.catalogue.db.mapper.NameUsageMapper;
 import life.catalogue.db.mapper.VerbatimSourceMapper;
 import life.catalogue.es.InvalidQueryException;
-import life.catalogue.es.NameUsageSearchService;
-import life.catalogue.es.NameUsageSuggestionService;
+import life.catalogue.search.NameUsageSearchService;
+import life.catalogue.search.NameUsageSuggestionService;
 
 import org.gbif.api.vocabulary.TaxonomicStatus;
 import org.gbif.nameparser.api.Rank;

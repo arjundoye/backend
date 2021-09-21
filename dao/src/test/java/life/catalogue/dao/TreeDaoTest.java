@@ -5,7 +5,7 @@ import life.catalogue.db.PgSetupRule;
 import life.catalogue.db.tree.SectorDataRule;
 import life.catalogue.db.tree.TxtTreeDataRule;
 
-import life.catalogue.es.NameUsageSearchService;
+import life.catalogue.search.NameUsageSearchService;
 
 import org.gbif.nameparser.api.Rank;
 

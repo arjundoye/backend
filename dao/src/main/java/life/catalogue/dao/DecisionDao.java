@@ -6,7 +6,7 @@ import life.catalogue.api.model.Page;
 import life.catalogue.api.model.ResultPage;
 import life.catalogue.api.search.DecisionSearchRequest;
 import life.catalogue.db.mapper.DecisionMapper;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 
 import java.util.ArrayList;
 import java.util.List;

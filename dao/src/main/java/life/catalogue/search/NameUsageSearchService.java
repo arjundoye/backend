@@ -1,4 +1,4 @@
-package life.catalogue.es;
+package life.catalogue.search;
 
 import life.catalogue.api.model.DSID;
 import life.catalogue.api.model.Page;

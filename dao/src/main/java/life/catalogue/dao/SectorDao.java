@@ -5,7 +5,7 @@ import life.catalogue.api.search.NameUsageWrapper;
 import life.catalogue.api.search.SectorSearchRequest;
 import life.catalogue.api.vocab.DatasetOrigin;
 import life.catalogue.db.mapper.*;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-
-import org.gbif.nameparser.api.Rank;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,15 +99,11 @@ public class SectorDao extends DatasetEntityDao<Integer, Sector, SectorMapper> {
       for (Taxon t : toCopy) {
         t.setSectorKey(s.getId());
         TaxonDao.copyTaxon(session, t, did, user);
+        // index
+        NameUsageWrapper w = new NameUsageWrapper(t);
+        w.setSectorDatasetKey(s.getSubjectDatasetKey());
+        indexService.add(w);
       }
-      indexService.add(toCopy.stream()
-        .map(t -> {
-          NameUsageWrapper w = new NameUsageWrapper(t);
-          w.setSectorDatasetKey(s.getSubjectDatasetKey());
-          return w;
-        })
-        .collect(Collectors.toList()))
-      ;
 
       incSectorCounts(session, s, 1);
   

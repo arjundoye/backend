@@ -5,7 +5,7 @@ import life.catalogue.api.model.RequestScope;
 import life.catalogue.api.model.User;
 import life.catalogue.concurrent.BackgroundJob;
 import life.catalogue.concurrent.JobPriority;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

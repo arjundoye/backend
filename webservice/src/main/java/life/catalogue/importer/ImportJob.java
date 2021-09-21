@@ -15,7 +15,7 @@ import life.catalogue.common.util.LoggingUtils;
 import life.catalogue.dao.DatasetImportDao;
 import life.catalogue.dao.DecisionDao;
 import life.catalogue.dao.SectorDao;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.img.ImageService;
 import life.catalogue.img.LogoUpdateJob;
 import life.catalogue.importer.neo.NeoDb;

@@ -43,7 +43,7 @@ public class EsUtil {
    * @param config
    * @throws IOException
    */
-  public static int createIndex(RestClient client, Class<?> modelClass, IndexConfig config) throws IOException {
+  public static void createIndex(RestClient client, Class<?> modelClass, IndexConfig config) throws IOException {
     IndexDefinition indexDef = IndexDefinition.loadDefaults();
     indexDef.setMappings(MappingsFactory.usingFields().getMapping(modelClass));
     indexDef.getSettings().getIndex().setNumberOfShards(config.numShards);
@@ -54,7 +54,7 @@ public class EsUtil {
     }
     Request request = new Request("PUT", config.name);
     request.setJsonEntity(EsModule.write(indexDef));
-    return executeRequest(client, request).getStatusLine().getStatusCode();
+    executeRequest(client, request).getStatusLine().getStatusCode();
   }
 
   /**

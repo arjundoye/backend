@@ -5,7 +5,7 @@ import life.catalogue.concurrent.BackgroundJob;
 import life.catalogue.dao.DaoUtils;
 import life.catalogue.dao.NameDao;
 import life.catalogue.dao.TaxonDao;
-import life.catalogue.es.NameUsageIndexService;
+import life.catalogue.search.NameUsageIndexService;
 import life.catalogue.matching.NameIndexFactory;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;

@@ -17,7 +17,7 @@ import life.catalogue.db.tree.TextTreePrinter;
 import life.catalogue.dw.jersey.MoreMediaTypes;
 import life.catalogue.dw.jersey.Redirect;
 import life.catalogue.dw.jersey.filter.VaryAccept;
-import life.catalogue.es.NameUsageSearchService;
+import life.catalogue.search.NameUsageSearchService;
 import life.catalogue.exporter.ExportManager;
 
 import org.gbif.nameparser.api.Rank;

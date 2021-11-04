@@ -75,7 +75,7 @@
     <jcommander.version>1.81</jcommander.version>
     <jjwt.version>0.10.7</jjwt.version>
     <jsoup.version>1.14.3</jsoup.version>
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
     <kryo-serializers.version>0.45</kryo-serializers.version>
     <kryo.version>5.0.0-RC5</kryo.version>
     <kryo-reflectasm.version>1.11.9</kryo-reflectasm.version>
